@@ -111,7 +111,7 @@ const createCard = (character) => {
 }
 
 
-// Carrega o jogo usando o "Math.rondom() - 0.5" e gera uma aleatoridade nas posições das cartas
+// Duplica as cartas do array e carrega o jogo, usando "Math.rondom() - 0.5" gera uma aleatoridade nas posições das cartas a cada novo início
 const loadGame = () => {
   const duplicateCharacters = [...characters, ...characters];
 
