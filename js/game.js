@@ -1,8 +1,16 @@
-
 // Const com as cartas, nome do jogador e tempo
 const grid = document.querySelector('.grid');
 const spanPlayer = document.querySelector('.player');
 const timer = document.querySelector('.timer');
+
+const modalOverlay = document.querySelector('.modal-overlay');
+const modalMessage = document.querySelector('.modal-message');
+const btnBackLogin = document.querySelector('.btn-back-login');
+
+// Sons
+const soundFlip = new Audio('/memorygame/sounds/flip.mp3');
+const soundMatch = new Audio('/memorygame/sounds/acerto.mp3');
+const soundError = new Audio('/memorygame/sounds/erro.mp3');
 
 // Array com o nome das cartas
 const characters = [
@@ -18,83 +26,94 @@ const characters = [
   'scroopy',
 ];
 
-//  Const para criação das cartas no HTML
+// Const para criação dos elementos
 const createElement = (tag, className) => {
   const element = document.createElement(tag);
   element.className = className;
   return element;
-}
+};
 
-// Let que obtem as cartas viradas
 let firstCard = '';
 let secondCard = '';
+let lockBoard = false; // trava clique enquanto cartas erradas estão viradas
 
-// A cada duas cartas viaradas entra nesse "Loop" para verificar se foram viradas as últimas cartas caso o resultado seja verdadeiro encerra o jogo
 const checkEndGame = () => {
   const disabledCards = document.querySelectorAll('.disabled-card');
 
   if (disabledCards.length === 20) {
-    clearInterval(this.loop);
-    alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML}`);
-  }
-}
+    clearInterval(loop);
 
-// Checa  se as cartas viradas são iguals para deixá-las viradas e cinzas com o CSS disable
-// Caso sejam diferentes depois do contador atingir o limite 500 desvira as cartas para continuar
+    // Mostrar modal com mensagem
+    modalMessage.textContent = `Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.`;
+    modalOverlay.classList.remove('hidden');
+  }
+};
+
 const checkCards = () => {
   const firstCharacter = firstCard.getAttribute('data-character');
   const secondCharacter = secondCard.getAttribute('data-character');
 
   if (firstCharacter === secondCharacter) {
-
+    // Acerto
     firstCard.firstChild.classList.add('disabled-card');
     secondCard.firstChild.classList.add('disabled-card');
 
-    firstCard = '';
-    secondCard = '';
+    // Adiciona brilho verde
+    firstCard.classList.add('correct');
+    secondCard.classList.add('correct');
 
-    checkEndGame();
+    soundMatch.play();
 
-  } else {
     setTimeout(() => {
+      // Remove o brilho após 1.2s para não acumular estilos
+      firstCard.classList.remove('correct');
+      secondCard.classList.remove('correct');
+      firstCard = '';
+      secondCard = '';
+      lockBoard = false;
 
-      firstCard.classList.remove('reveal-card');
-      secondCard.classList.remove('reveal-card');
+      checkEndGame();
+    }, 1200);
+    
+  } else {
+    // Erro
+    soundError.play();
+    lockBoard = true;
+
+    // Adiciona brilho vermelho
+    firstCard.classList.add('wrong');
+    secondCard.classList.add('wrong');
+
+    setTimeout(() => {
+      firstCard.classList.remove('reveal-card', 'wrong');
+      secondCard.classList.remove('reveal-card', 'wrong');
 
       firstCard = '';
       secondCard = '';
-
-    }, 500);
+      lockBoard = false;
+    }, 1000);
   }
+};
 
-}
-
-
-// Guarda a carta virada para conferir se as duas são iguais
 const revealCard = ({ target }) => {
-
+  if (lockBoard) return;
   if (target.parentNode.className.includes('reveal-card')) {
     return;
   }
 
+  target.parentNode.classList.add('reveal-card');
+  soundFlip.play();
+
   if (firstCard === '') {
-
-    target.parentNode.classList.add('reveal-card');
     firstCard = target.parentNode;
-
   } else if (secondCard === '') {
-
-    target.parentNode.classList.add('reveal-card');
     secondCard = target.parentNode;
 
     checkCards();
-
   }
-}
+};
 
-// Para gerar as cartas duplicadas e aplicar o CSS
 const createCard = (character) => {
-
   const card = createElement('div', 'card');
   const front = createElement('div', 'face front');
   const back = createElement('div', 'face back');
@@ -104,14 +123,12 @@ const createCard = (character) => {
   card.appendChild(front);
   card.appendChild(back);
 
+  card.setAttribute('data-character', character);
   card.addEventListener('click', revealCard);
-  card.setAttribute('data-character', character)
 
   return card;
-}
+};
 
-
-// Duplica as cartas do array e carrega o jogo, usando "Math.rondom() - 0.5" gera uma aleatoridade nas posições das cartas a cada novo início
 const loadGame = () => {
   const duplicateCharacters = [...characters, ...characters];
 
@@ -121,21 +138,25 @@ const loadGame = () => {
     const card = createCard(character);
     grid.appendChild(card);
   });
-}
+};
 
-// Const para contagem de tempo do jogo
+let loop;
+
 const startTimer = () => {
-
-  this.loop = setInterval(() => {
+  loop = setInterval(() => {
     const currentTime = +timer.innerHTML;
     timer.innerHTML = currentTime + 1;
   }, 1000);
+};
 
-}
+// Voltar para a tela de login ao clicar no botão do modal
+btnBackLogin.addEventListener('click', () => {
+  window.location.href = '../index.html';
+});
 
-// Busca o nome do Jogador inserido na página de login
+// Busca o nome do Jogador inserido na página de login e inicia o jogo
 window.onload = () => {
   spanPlayer.innerHTML = localStorage.getItem('player');
   startTimer();
   loadGame();
-}
+};

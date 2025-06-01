@@ -1,79 +1,225 @@
 main {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    background-image: url("../img/bg.jpg");
-    background-size: cover;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 20px 50px;
-  }
-  
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: rgba(255, 255, 255, 0.8);
-    font-size: 1.2em;
-    width: 100%;
-    max-width: 800px;
-    padding: 30px;
-    margin: 0 0 30px;
-    border-radius: 5px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-image: url("../img/bg.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px 50px;
+  box-sizing: border-box;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2em;
+  width: 100%;
+  max-width: 800px;
+  padding: 30px;
+  margin: 0 0 30px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.player {
+  font-weight: bold;
+}
+
+/* Grid com 7 colunas */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 15px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.card {
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  border-radius: 5px;
+  position: relative;
+  transition: all 400ms ease;
+  transform-style: preserve-3d;
+  background-color: #ccc;
+  cursor: pointer;
+}
+
+.face {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  border: 5px solid #00b5cc;
+  border-radius: 5px;
+  transition: all 400ms ease;
+  backface-visibility: hidden;
+}
+
+.front {
+  transform: rotateY(180deg);
+}
+
+.back {
+  background-image: url("../img/back.png");
+}
+
+.reveal-card {
+  transform: rotateY(180deg);
+}
+
+.disabled-card {
+  filter: saturate(0);
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* === RESPONSIVIDADE === */
+
+/* Tablets e telas médias (até 920px) */
+@media screen and (max-width: 920px) {
   .grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 15px;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(5, 1fr);
+    max-width: 900px;
+    gap: 12px;
   }
-  
+
+  header {
+    max-width: 90vw;
+    padding: 20px;
+    font-size: 1em;
+  }
+}
+
+/* Celulares grandes (até 600px) */
+@media screen and (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 100vw;
+    gap: 10px;
+  }
+
+  header {
+    font-size: 0.9em;
+    padding: 15px;
+  }
+
+  main {
+    padding: 15px 15px 40px;
+  }
+}
+
+/* Celulares pequenos (até 400px) */
+@media screen and (max-width: 400px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  header {
+    font-size: 0.85em;
+    padding: 12px;
+  }
+
   .card {
-    aspect-ratio: 3/4;
-    width: 100%;
-    border-radius: 5px;
-    position: relative;
-    transition: all 400ms ease;
-    transform-style: preserve-3d;
-    background-color: #ccc;
+    border-radius: 4px;
   }
-  
+
   .face {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    background-size: cover;
-    background-position: center;
-    border: 5px solid #00b5cc;
-    border-radius: 5px;
-    transition: all 400ms ease;
+    border-width: 4px;
   }
-  
-  .front {
-    transform: rotateY(180deg);
+}
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Esconde o modal */
+.hidden {
+  display: none;
+}
+
+/* Modal conteúdo */
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  padding: 30px 40px;
+  max-width: 350px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+  color: #00b5cc;
+}
+
+.modal-content p {
+  font-size: 1.2em;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.btn-back-login {
+  background-color: #00b5cc;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-back-login:hover {
+  background-color: #0094a6;
+}
+
+/* Responsividade do modal */
+@media screen and (max-width: 400px) {
+  .modal-content {
+    width: 90vw;
+    padding: 20px;
   }
-  
-  .back {
-    background-image: url("../img/back.png");
-    backface-visibility: hidden;
+
+  .modal-content p {
+    font-size: 1em;
   }
-  
-  .reveal-card {
-    transform: rotateY(180deg);
-  }
-  
-  .disabled-card {
-    filter: saturate(0);
-    opacity: 0.5;
-  }
-  
-  @media screen and (max-width:920px) {
-    .grid {
-      grid-template-columns: repeat(5, 1fr);
-  
-    }
-  }
+}
+
+.correct {
+  box-shadow:
+    0 0 15px 5px #4CAF50,  /* verde */
+    0 0 30px 10px #4CAF50;
+  transition: box-shadow 0.4s ease;
+}
+
+.wrong {
+  box-shadow:
+    0 0 15px 5px #E53935,  /* vermelho */
+    0 0 30px 10px #E53935;
+  transition: box-shadow 0.4s ease;
+}
+
+/* Opcional: para suavizar o efeito de remoção */
+.reveal-card.correct,
+.reveal-card.wrong {
+  transition: box-shadow 0.4s ease;
+}
