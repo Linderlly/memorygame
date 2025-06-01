@@ -1,18 +1,17 @@
-// Const com as cartas, nome do jogador e tempo
+// Seletores principais
 const grid = document.querySelector('.grid');
 const spanPlayer = document.querySelector('.player');
 const timer = document.querySelector('.timer');
-
 const modalOverlay = document.querySelector('.modal-overlay');
 const modalMessage = document.querySelector('.modal-message');
 const btnBackLogin = document.querySelector('.btn-back-login');
 
-// Sons
+// Efeitos sonoros
 const soundFlip = new Audio('/memorygame/sounds/flip.mp3');
 const soundMatch = new Audio('/memorygame/sounds/acerto.mp3');
 const soundError = new Audio('/memorygame/sounds/erro.mp3');
 
-// Array com o nome das cartas
+// Cartas do jogo
 const characters = [
   'beth',
   'jerry',
@@ -26,7 +25,7 @@ const characters = [
   'scroopy',
 ];
 
-// Const para criação dos elementos
+// Função auxiliar para criar elementos
 const createElement = (tag, className) => {
   const element = document.createElement(tag);
   element.className = className;
@@ -35,20 +34,21 @@ const createElement = (tag, className) => {
 
 let firstCard = '';
 let secondCard = '';
-let lockBoard = false; // trava clique enquanto cartas erradas estão viradas
+let lockBoard = false;
 
+// Verifica fim de jogo
 const checkEndGame = () => {
   const disabledCards = document.querySelectorAll('.disabled-card');
 
   if (disabledCards.length === 20) {
     clearInterval(loop);
 
-    // Mostrar modal com mensagem
     modalMessage.textContent = `Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi de: ${timer.innerHTML} segundos.`;
     modalOverlay.classList.remove('hidden');
   }
 };
 
+// Comparar cartas
 const checkCards = () => {
   const firstCharacter = firstCard.getAttribute('data-character');
   const secondCharacter = secondCard.getAttribute('data-character');
@@ -58,31 +58,29 @@ const checkCards = () => {
     firstCard.firstChild.classList.add('disabled-card');
     secondCard.firstChild.classList.add('disabled-card');
 
-    // Adiciona brilho verde
     firstCard.classList.add('correct');
     secondCard.classList.add('correct');
 
     soundMatch.play();
 
     setTimeout(() => {
-      // Remove o brilho após 1.2s para não acumular estilos
       firstCard.classList.remove('correct');
       secondCard.classList.remove('correct');
+
       firstCard = '';
       secondCard = '';
       lockBoard = false;
 
       checkEndGame();
     }, 1200);
-    
   } else {
     // Erro
-    soundError.play();
     lockBoard = true;
 
-    // Adiciona brilho vermelho
     firstCard.classList.add('wrong');
     secondCard.classList.add('wrong');
+
+    soundError.play();
 
     setTimeout(() => {
       firstCard.classList.remove('reveal-card', 'wrong');
@@ -95,24 +93,29 @@ const checkCards = () => {
   }
 };
 
+// Revela carta ao clicar
 const revealCard = ({ target }) => {
-  if (lockBoard) return;
-  if (target.parentNode.className.includes('reveal-card')) {
+  const card = target.parentNode;
+
+  if (lockBoard || card.classList.contains('reveal-card') || card.classList.contains('disabled-card')) {
     return;
   }
 
-  target.parentNode.classList.add('reveal-card');
+  card.classList.add('reveal-card');
   soundFlip.play();
 
-  if (firstCard === '') {
-    firstCard = target.parentNode;
-  } else if (secondCard === '') {
-    secondCard = target.parentNode;
-
-    checkCards();
+  if (!firstCard) {
+    firstCard = card;
+    return;
   }
+
+  secondCard = card;
+  lockBoard = true;
+
+  setTimeout(checkCards, 500); // pequena pausa para deixar transição suave
 };
 
+// Cria carta com frente e verso
 const createCard = (character) => {
   const card = createElement('div', 'card');
   const front = createElement('div', 'face front');
@@ -129,9 +132,9 @@ const createCard = (character) => {
   return card;
 };
 
+// Carrega o jogo embaralhando as cartas
 const loadGame = () => {
   const duplicateCharacters = [...characters, ...characters];
-
   const shuffledArray = duplicateCharacters.sort(() => Math.random() - 0.5);
 
   shuffledArray.forEach((character) => {
@@ -142,6 +145,7 @@ const loadGame = () => {
 
 let loop;
 
+// Inicia o cronômetro
 const startTimer = () => {
   loop = setInterval(() => {
     const currentTime = +timer.innerHTML;
@@ -149,12 +153,12 @@ const startTimer = () => {
   }, 1000);
 };
 
-// Voltar para a tela de login ao clicar no botão do modal
+// Botão para voltar ao login
 btnBackLogin.addEventListener('click', () => {
   window.location.href = '../index.html';
 });
 
-// Busca o nome do Jogador inserido na página de login e inicia o jogo
+// Inicia o jogo ao carregar
 window.onload = () => {
   spanPlayer.innerHTML = localStorage.getItem('player');
   startTimer();
